@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:provider/provider.dart';
 import '../provider/semaforo_provider.dart';
 import './car.dart';
+import 'controler.dart';
 
 class Ligths extends StatefulWidget {
   const Ligths({super.key});
@@ -17,6 +18,7 @@ class _LigthsState extends State<Ligths> {
   late Timer _timerCar;
   bool ligthClicked = false;
   int positionCar = 0;
+  int velocityCar = 1;
 
   @override
   void initState() {
@@ -82,26 +84,16 @@ class _LigthsState extends State<Ligths> {
     if (!ligthClicked) {
       if (idx != 1) {
         setState(() {
-          for (int i = 0; i < semaforo.semaforo.length; i++) {
-            final light = semaforo.semaforo[i];
-            light.onOff = i == idx ? !light.onOff : false;
-          }
           indexLigth = idx;
           ligthClicked = true;
-          if (semaforo.semaforo[idx].nameIndex == "verde") {
-            _moveCar();
-          } else {
-            _stopCar();
-          }
+          _compareIndexes();
         });
         Timer(Duration(seconds: semaforo.semaforo[idx].changeTime), () {
-          _compareIndexes();
           _incrementIndex(semaforo.semaforo.length);
         });
       }
-    } else {
-      _timerClick();
     }
+    _timerClick();
   }
 
   void _timerClick() {
@@ -119,9 +111,10 @@ class _LigthsState extends State<Ligths> {
   void _positionOfCar() {
     setState(() {
       if (positionCar < 100) {
-        positionCar = positionCar + 1;
+        positionCar = positionCar + velocityCar;
       }
     });
+    print(positionCar);
   }
 
   void _moveCar() {
@@ -149,23 +142,20 @@ class _LigthsState extends State<Ligths> {
       }
     });
   }
-  // funcion para controlar el value de postionCar
 
-  void addVelocity() {
+  // funcion de manejo de velocidad de auto
+
+  void _addVelocity() {
     setState(() {
-      positionCar = positionCar + 1;
+      velocityCar = velocityCar + 1;
     });
   }
 
-  void lessVelocity() {
+  void _removeVelocity() {
     setState(() {
-      positionCar = positionCar + 1;
+      velocityCar = velocityCar - 1;
     });
   }
-
-  void onChangeVelociy() {}
-
-  //funcionalida de pausar la app
 
   @override
   Widget build(BuildContext context) {
@@ -188,6 +178,11 @@ class _LigthsState extends State<Ligths> {
               );
             },
           ),
+        ),
+        ControlerWidget(
+          onIncreaseSpeed: _addVelocity,
+          onDecreaseSpeed: _removeVelocity,
+          velocity: velocityCar,
         ),
         Car(positionPercentage: positionCar),
       ],
